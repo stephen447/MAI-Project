@@ -1,0 +1,82 @@
+import numpy as np
+import pandas as p
+from csv import writer
+df = p.read_csv('/Users/stephenbyrne/Documents/College Year 5/Project/AttackTV.csv')
+c1 = df.iloc[:, 0]  # Reading in combined id and payload
+c2 = df.iloc[:, 1]  # Reading in target variable
+
+#split_payload = []  #Isolated payload
+#split_decimalid = [] #
+split_id = [None] * 81262  # Separated ID
+split_payload = [None] * 81262  # Separated payload
+split_decimalid = [None] * 81262  # Separated Binary payload
+bin1 = [None] * 81262  # Isolated binary bit 1 LSB
+bin2 = [None] * 81262  # Isolated binary bit 2
+bin3 = [None] * 81262  # Isolated binary bit 3
+bin4 = [None] * 81262  # Isolated binary bit 4
+bin5 = [None] * 81262  # Isolated binary bit 5
+bin6 = [None] * 81262  # Isolated binary bit 6
+bin7 = [None] * 81262  # Isolated binary bit 7
+bin8 = [None] * 81262  # Isolated binary bit 8
+bin9 = [None] * 81262  # Isolated binary bit 9
+bin10 = [None] * 81262  # Isolated binary bit 10
+bin11 = [None] * 81262  # Isolated binary bit 11
+bin12 = [None] * 81262  # Isolated binary bit 12 MSB
+
+
+for index in range(0, 81261): # splitting id in HEX form
+    a_string = c1[index]
+    split_id[index] = a_string[0 : 3]
+
+for index1 in range(0, 81261): # splitting payload
+    a_string = c1[index1]
+    split_payload[index1] = a_string[4: 21]
+
+for index in range(0, 81261):  # Converting hex value to decimal and then to binary and then zero padding to 12 bits
+    a_string = split_id[index]
+    a_string = int(a_string, 16)
+    a_string = bin(a_string)
+    a_string= a_string[2:]
+    a_string = a_string.zfill(12)
+    split_decimalid[index] = a_string  # offsetting '0b' at beginning of binary value
+
+for index in range(0, 81261):  # Isolating each binary bit
+    a_string = split_decimalid[index]
+    for i in range(0, 12):
+        value = a_string[i]
+        if i == 0:
+            bin12[index] = value
+        elif i == 1:
+            bin11[index] = value
+        elif i == 2:
+            bin10[index] = value
+        elif i == 3:
+            bin9[index] = value
+        elif i == 4:
+            bin8[index] = value
+        elif i == 5:
+            bin7[index] = value
+        elif i == 6:
+            bin6[index] = value
+        elif i == 7:
+            bin5[index] = value
+        elif i == 8:
+            bin4[index] = value
+        elif i == 9:
+            bin3[index] = value
+        elif i == 10:
+            bin2[index] = value
+        elif i == 11:
+            bin1[index] = value
+
+with open('/Users/stephenbyrne/Documents/College Year 5/Project/separatedID.csv', 'a', newline='') as f_object:
+    # Pass the CSV  file object to the writer() function
+    writer_object = writer(f_object)
+    # Result - a writer object
+    # Pass the data in the list as an argument into the writerow() function
+    for x in range(0, 81261):
+        list_data = [split_decimalid[x], split_payload[x], c2[x], bin1[x], bin2[x], bin3[x], bin4[x], bin5[x], bin6[x], bin7[x], bin8[x], bin8[x], bin10[x], bin11[x], bin12[x]]
+        writer_object.writerow(list_data)
+    # Close the file object
+    f_object.close()
+
