@@ -1,0 +1,38 @@
+import numpy as np
+import pandas as p
+from csv import writer
+
+
+df = p.read_csv('/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/fuzzing_attack_1.csv')
+print("CSV data\n", df)  # Print CSV file read in
+c1 = df.iloc[:, 2]  # Reading in ID and
+target_variable = [0 for a in range(len(c1))]
+y = 0
+z = 0
+
+for x in range(len(c1)):
+    if c1[x][4: 21] == "FFFFFFFFFFFFFFFF":
+        target_variable[x] = 1
+        y = y + 1
+    else:
+        target_variable[x] = 0
+        z = z + 1
+
+
+print('No. of attacks', y)
+print('No. of safe messages', z)
+target_variable = np.transpose(target_variable)
+df["B"] = target_variable
+#print('Target variable\n', target_variable)
+
+
+with open('/Users/stephenbyrne/Documents/College Year 5/Project/AttackTV.csv', 'a', newline='') as f_object:
+    # Pass the CSV  file object to the writer() function
+    writer_object = writer(f_object)
+    # Result - a writer object
+    # Pass the data in the list as an argument into the writerow() function
+    for x in range(len(c1)):
+        list_data = [c1[x], target_variable[x]]
+        writer_object.writerow(list_data)
+    # Close the file object
+    f_object.close()
