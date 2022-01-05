@@ -28,24 +28,25 @@ start_time = time.time()
 ssl._create_default_https_context = ssl._create_unverified_context
 
 df = p.read_csv('/Users/stephenbyrne/Documents/College Year 5/Project/separatedID.csv')
-x = df.iloc[:, 0]  # Reading in first feature
+x = df.iloc[:, 3:15]  # Reading in first feature
 y = df.iloc[:, 2]  # Reading in target
 
 # Model / data parameters
 num_classes = 1
-input_shape = (1, 1, 1)
+input_shape = (12, 1, 1)
 
 
 x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1, random_state=0)  # Splitting data into training and test
 print("orig x_train shape:", x_train.shape)
 print("length of training", len(x_test))
+print("length of testing", len(x_train))
 print("x train", x_train)
 print("y_train", y_train)
 
-x_train = x_train.values.reshape(73134, 1, 1, 1)
-x_test = x_test.values.reshape(8126, 1, 1, 1)
+x_train = x_train.values.reshape(73134, 12, 1, 1)
+x_test = x_test.values.reshape(8127, 12, 1, 1)
 y_train = y_train.values.reshape(73134, 1)
-y_test = y_test.values.reshape(8126, 1)
+y_test = y_test.values.reshape(8127, 1)
 
 use_saved_model = False
 if use_saved_model:
@@ -91,7 +92,7 @@ else:
 # Classifying data
 preds = model.predict(x_test)
 for i in range(len(preds)):
-	if(preds[i]>.03):
+	if(preds[i]>.1):
 		print(preds[i], '\n', i)
 		preds[i] = 1
 	else:
@@ -104,7 +105,7 @@ print("y test", y_test)
 print("predictions", preds)
 print(classification_report(y_test, preds))
 print(confusion_matrix(y_test,preds))
-print("Accuracy (Baseline):  ", model.score(t, BL_pred))  # Accuracy
+#print("Accuracy (Baseline):  ", model.score(t, BL_pred))  # Accuracy
 print("F1 score: ", f1_score(y_test, preds, average="macro"))  # F1 score
 print("Precision: ", precision_score(y_test, preds, average="macro"))  # Precision score
 print("Recall: ", recall_score(y_test, preds, average="macro"))  # Recall score
