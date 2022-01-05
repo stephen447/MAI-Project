@@ -28,12 +28,23 @@ start_time = time.time()
 ssl._create_default_https_context = ssl._create_unverified_context
 
 df = p.read_csv('/Users/stephenbyrne/Documents/College Year 5/Project/separatedID.csv')
-x = df.iloc[:, 3:15]  # Reading in first feature
+dp = df.iloc[:, 1]  # Reading in first feature
+
+pl_feature = [None] * len(dp)
+
+for index in range(0, len(dp)):
+    if dp[index] =='595945450000FFFF':
+        pl_feature[index] = 1
+    else:
+        pl_feature[index] = 0
+
+df['DECIMAL PAYLOAD'] = pl_feature
+x = df.iloc[:, 3:16]  # Reading in first feature
 y = df.iloc[:, 2]  # Reading in target
 
 # Model / data parameters
 num_classes = 1
-input_shape = (12, 1, 1)
+input_shape = (13, 1, 1)
 
 
 x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1, random_state=0)  # Splitting data into training and test
@@ -43,8 +54,8 @@ print("length of testing", len(x_train))
 print("x train", x_train)
 print("y_train", y_train)
 
-x_train = x_train.values.reshape(73134, 12, 1, 1)
-x_test = x_test.values.reshape(8127, 12, 1, 1)
+x_train = x_train.values.reshape(73134, 13, 1, 1)
+x_test = x_test.values.reshape(8127, 13, 1, 1)
 y_train = y_train.values.reshape(73134, 1)
 y_test = y_test.values.reshape(8127, 1)
 
@@ -131,9 +142,3 @@ plt.legend(handles=[NN], loc="center right")  # Plotting legend
 fpr, tpr, thresholds = roc_curve(y_test, preds)  # ROC curve
 plt.plot(fpr, tpr, c='green')  # Plot ROC curve
 plt.show()
-
-
-
-
-
-
