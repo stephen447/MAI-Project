@@ -1,38 +1,79 @@
 import numpy as np
 import pandas as p
 from csv import writer
+df = p.read_csv('/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/correlated_signal_attack_1.csv')
+c1 = df.iloc[:, 2]  # Reading in ID
 
+ID = [None]*len(c1)
+PL = [None]*len(c1)
+TV = [None]*len(c1)
 
-df = p.read_csv('/Users/stephenbyrne/Desktop/signalattack.csv')
-print("CSV data\n", df)  # Print CSV file read in
-c1 = df.iloc[:, 0]  # Reading in feature 1
-target_variable = [0 for a in range(81262)]
-y = 0
-z = 0
+y = 0; z = 0
 
-for x in range(81262):
-    if c1[x] == "6E0#595945450000FFFF":
-        target_variable[x] = 1
-        y = y + 1
+for i in range(0, len(c1)): # splitting id in HEX form
+    string = c1[i]
+    ID[i] = string[0:3]
+    PL[i] = string[4:20]
+
+for i in range(len(c1)):
+    if c1[i][4:20] == "595945450000FFFF":
+        if c1[i][0:3] == '6E0':
+            TV[i] = 1
+            y = y + 1
     else:
-        target_variable[x] = 0
+        TV[i] = 0
         z = z + 1
 
 
 print('No. of attacks', y)
 print('No. of safe messages', z)
-target_variable = np.transpose(target_variable)
-df["B"] = target_variable
-#print('Target variable\n', target_variable)
+
+PL1 = [None] * len(PL)  # Separated payload 1
+PL2 = [None] * len(PL)  # Separated payload 2
+PL3 = [None] * len(PL)  # Separated payload 3
+PL4 = [None] * len(PL)  # Separated payload 4
+PLbin = [None] * len(PL)  # Separated payload 4
+pl = 0
+ID1 = [None] * len(ID)  # Separated payload 1
+ID2 = [None] * len(ID)  # Separated payload 2
+ID3 = [None] * len(ID)  # Separated payload 3
+IDbin = [None] * len(ID)  # Separated payload 3
+IDcomb = [None] * len(ID)  # Separated payload 3
+
+for i in range(0, len(PL)):
+    pl = PL[i]
+    pl = int(pl, 16)
+    pl = bin(pl)
+    PLbin[i] = pl.zfill(64)
+    PL1[i] = PLbin[i][2:18]
+    PL2[i] = PLbin[i][18:34]
+    PL3[i] = PLbin[i][34:50]
+    PL4[i] = PLbin[i][50:66]
+
+for i in range(0, len(ID)):
+    id = ID[i]
+    id = int(id, 16)
+    id = bin(id)
+    id = id[2:]
+    id = id.zfill(12)
+    IDbin[i] = id
+
+for i in range(3, len(ID)):
+    ID1[i] = ID[i-1]
+    ID2[i] = ID[i-2]
+    ID3[i] = ID[i-3]
+    IDcomb[i] = ID[i]+ID1[i]+ID2[i]+ID3[i]
+
+df['Target Variable'] = TV
+df['Combined IDs'] = IDcomb
+df['PL 1'] = PL1
+df['PL 2'] = PL2
+df['PL 3'] = PL3
+df['PL 4'] = PL4
+print(PL1[0].type)
+
+print(df)
+df = df.iloc[3:]
+print(df)
 
 
-with open('/Users/stephenbyrne/Documents/College Year 5/Project/AttackTV.csv', 'a', newline='') as f_object:
-    # Pass the CSV  file object to the writer() function
-    writer_object = writer(f_object)
-    # Result - a writer object
-    # Pass the data in the list as an argument into the writerow() function
-    for x in range(81262):
-        list_data = [c1[x], target_variable[x]]
-        writer_object.writerow(list_data)
-    # Close the file object
-    f_object.close()
