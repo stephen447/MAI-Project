@@ -86,9 +86,9 @@ for i in range(0, len(PL1)):
 	pl4 = PL4[i]
 	print('PL 1 is', pl1)
 	PL1[i] = int(pl1, 2)
-	PL2[i] = int(pl1)
-	PL3[i] = int(pl1)
-	PL4[i] = int(pl1)
+	PL2[i] = int(pl2, 2)
+	PL3[i] = int(pl3, 2)
+	PL4[i] = int(pl4, 2)
 
 for i in range(0, len(ID)):
     id = ID[i]
