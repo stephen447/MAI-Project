@@ -120,6 +120,9 @@ print(df)
 x = df.iloc[:, 4:9]  # Reading in first feature
 y = df.iloc[:, 3]  # Reading in target
 
+x = np.array(x)
+y = np.array(y)
+
 # Model / data parameters
 num_classes = 1
 input_shape = (5, 1, 1)
@@ -132,10 +135,10 @@ print("length of testing", len(x_train))
 print("x train", x_train)
 print("y_train", y_train)
 
-x_train = x_train.values.reshape(len(x_train), 5, 1, 1)
-x_test = x_test.values.reshape(len(x_test), 5, 1, 1)
-y_train = y_train.values.reshape(len(y_train), 1)
-y_test = y_test.values.reshape(len(y_test), 1)
+x_train = x_train.reshape(len(x_train), 5, 1, 1)
+x_test = x_test.reshape(len(x_test), 5, 1, 1)
+y_train = y_train.reshape(len(y_train), 1)
+y_test = y_test.reshape(len(y_test), 1)
 
 use_saved_model = False
 if use_saved_model:
@@ -144,12 +147,16 @@ else:
 	model = keras.Sequential()
 	#model.add(Conv2D(16, (3,3), padding='same', input_shape=x_train.shape[1:],activation='relu'))
 	model.add(Conv2D(16, (3, 3), padding='same', input_shape=input_shape, activation='relu'))
+	model.add(BatchNormalization())
 	#model.add(Conv2D(16, (3,3), strides=(2, 2), padding='same', activation='relu'))
 	model.add(Conv2D(16, (3,3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
 	#model.add(MaxPooling2D(pool_size=(2, 2)))
 	model.add(Conv2D(32, (3,3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
 	#model.add(Conv2D(32, (3,3), strides=(2,2), padding='same', activation='relu'))
 	model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
 	#model.add(MaxPooling2D(pool_size=(2, 2)))
 	#model.add(Dropout(0.5))
 	model.add(Flatten())
@@ -179,18 +186,21 @@ else:
 	plt.show()
 
 # Classifying data
+#print('model out')
+np.set_printoptions(threshold=sys.maxsize)
 preds = model.predict(x_test)
+print(preds)
 for i in range(len(preds)):
 	if(preds[i]>.1):
-		print(preds[i], '\n', i)
+		print('Attack threshold', preds[i], '\n', i)
 		preds[i] = 1
 	else:
 		preds[i] = 0
 
 
 # Performance metrics
-print("X test", x_test)
-print("y test", y_test)
+#print("X test", x_test)
+#print("y test", y_test)
 print("predictions", preds)
 print(classification_report(y_test, preds))
 print(confusion_matrix(y_test,preds))
