@@ -1,0 +1,31 @@
+model.add(Conv2D(40, (3, 3), padding='same', input_shape=input_shape, activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
+
+	model.add(Conv2D(80, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.4))
+
+	model.add(Conv2D(120, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
+
+	model.add(Conv2D(160, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.5))
+
+	model.add(Conv2D(200, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
+
+	model.add(Conv2D(240, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.5))
+
+	model.add(Conv2D(256, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
+
+	model.add(Conv2D(512, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
