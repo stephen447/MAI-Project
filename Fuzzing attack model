@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, regularizers
 from keras.layers import Dense, Dropout, Activation, Flatten, BatchNormalization
-from keras.layers import Conv2D, MaxPooling2D, LeakyReLU
+from keras.layers import Conv2D, MaxPooling2D, LeakyReLU, MaxPooling3D
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.metrics import classification_report, confusion_matrix, f1_score, precision_score, recall_score
 import sklearn as skl
@@ -32,11 +32,10 @@ c1 = df.iloc[:, 2]  # Reading in ID
 
 ID = [None]*len(c1)
 PL = [None]*len(c1)
-TV = [None]*len(c1)
-
+TV = np.zeros(len(c1))
 y = 0; z = 0
 
-for i in range(0, len(c1)): # splitting id in HEX form
+for i in range(0, len(c1)):  # splitting id in HEX form
     string = c1[i]
     ID[i] = string[0:3]
     PL[i] = string[4:20]
@@ -49,44 +48,14 @@ for i in range(len(c1)):
 		TV[i] = 0
 		z = z + 1
 
-
-
 print('No. of attacks', y)
-print('No. of safe messages', z)
-
-PL1 = [None] * len(PL)  # Separated payload 1
-PL2 = [None] * len(PL)  # Separated payload 2
-PL3 = [None] * len(PL)  # Separated payload 3
-PL4 = [None] * len(PL)  # Separated payload 4
-PLbin = [None] * len(PL)  # Separated payload 4
-pl = 0; pl1 = 0; pl2 = 0; pl3 = 0; pl4 = 0;
+print('No. of non attacks', z)
 ID1 = [None] * len(ID)  # Separated payload 1
 ID2 = [None] * len(ID)  # Separated payload 2
 ID3 = [None] * len(ID)  # Separated payload 3
 IDbin = [None] * len(ID)  # Separated payload 3
+#IDbin = np.zeros(len(ID))
 IDcomb = [None] * len(ID)  # Separated payload 3
-
-for i in range(0, len(PL)):
-	pl = PL[i]
-	pl = int(pl, 16)
-	pl = bin(pl)
-	pl = pl[2:]
-	PLbin[i] = pl.zfill(64)
-	PL1[i] = PLbin[i][2:18]
-	PL2[i] = PLbin[i][18:34]
-	PL3[i] = PLbin[i][34:50]
-	PL4[i] = PLbin[i][50:66]
-
-
-for i in range(0, len(PL1)):
-	pl1 = PL1[i]
-	pl2 = PL2[i]
-	pl3 = PL3[i]
-	pl4 = PL4[i]
-	PL1[i] = int(pl1, 2)
-	PL2[i] = int(pl1)
-	PL3[i] = int(pl1)
-	PL4[i] = int(pl1)
 
 for i in range(0, len(ID)):
     id = ID[i]
@@ -95,69 +64,148 @@ for i in range(0, len(ID)):
     id = id[2:]
     id = id.zfill(12)
     IDbin[i] = id
+#print(IDbin)
 
-for i in range(3, len(ID)):
-	ID1[i] = IDbin[i - 1]
-	ID2[i] = IDbin[i - 2]
-	ID3[i] = IDbin[i - 3]
-	IDcomb[i] = IDbin[i] + ID1[i] + ID2[i] + ID3[i]
-	IDcomb[i] = int(IDcomb[i], 2)
+samples = len(c1)
+IDs_in_past = 7
+bit_length = 12
 
-df['Target Variable'] = TV
-df['Combined IDs'] = IDcomb
-df['PL 1'] = PL1
-df['PL 2'] = PL2
-df['PL 3'] = PL3
-df['PL 4'] = PL4
+x = np.zeros([samples, IDs_in_past, bit_length])
+y = np.zeros([samples, 1])
 
-print(df)
-df = df.iloc[3:]
-print(df)
+PL1 = [None] * len(c1)  #  Payload bit 16
+PL2 = [None] * len(c1)  #  Payload bit 16
+PL3 = [None] * len(c1)  #  Payload bit 16
 
+for i in range(len(c1)):
+    pl = c1[i]
+    payload1 = pl[4:5]
+    payload2 = pl[5:6]
+    payload3 = pl[6:7]
 
-x = df.iloc[:, 4:9]  # Reading in first feature
-y = df.iloc[:, 3]  # Reading in target
+    payload1 = int(payload1, 16)
+    payload1 = bin(payload1)
+    payload1 = payload1[2:]
+    payload1 = payload1.zfill(12)
+
+    payload2 = int(payload2, 16)
+    payload2 = bin(payload2)
+    payload2 = payload2[2:]
+    payload2 = payload2.zfill(12)
+
+    payload3 = int(payload3, 16)
+    payload3 = bin(payload3)
+    payload3 = payload3[2:]
+    payload3 = payload3.zfill(12)
+
+    PL1[i] = payload1
+    PL2[i] = payload2
+    PL3[i] = payload3
+
+for i in range(3, samples):
+    for j in range(IDs_in_past):
+        for k in range(bit_length):
+            temp = IDbin[i-j]
+            x[i][j][k] = temp[k]
+
+for i in range(3, len(c1)):
+    for k in range(bit_length):
+        temp1 = PL1[i]
+        temp2 = PL2[i]
+        temp3 = PL3[i]
+        x[i][4][k] = temp1[k]
+        x[i][5][k] = temp2[k]
+        x[i][6][k] = temp3[k]
+
+print(TV)
+for i in range(3, samples):
+	#print(TV[i])
+	a = TV[i]
+	b = TV[i - 1]
+	c = TV[i - 2]
+	d = TV[i - 3]
+	z = np.sum([a, b, c, d])
+	if(z<1):  # Normal
+		y[i] = 0
+	if(z >= 1):  # Attack
+		y[i] = 1
+		print('Attack!', i)
+
+print('X is', x)
+print('X shape', x.shape)
+print('y is', y)
+print('y shape', y.shape)
+
+x = x.astype('i')
+y = y.astype('i')
+
+x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1, random_state=0)  # Splitting data into training and test
 
 # Model / data parameters
 num_classes = 1
-input_shape = (5, 1, 1)
+input_shape = (1, 7, 12)
 
-
-x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1, random_state=0)  # Splitting data into training and test
 print("orig x_train shape:", x_train.shape)
-print("length of training", len(x_test))
-print("length of testing", len(x_train))
+print("length of testing", len(x_test))
+print("length of training", len(x_train))
 print("x train", x_train)
 print("y_train", y_train)
 
-x_train = x_train.values.reshape(len(x_train), 5, 1, 1)
-x_test = x_test.values.reshape(len(x_test), 5, 1, 1)
-y_train = y_train.values.reshape(len(y_train), 1)
-y_test = y_test.values.reshape(len(y_test), 1)
+x_train = x_train.reshape(len(x_train), 1, 7, 12)
+x_test = x_test.reshape(len(x_test), 1, 7, 12)
+y_train = y_train.reshape(len(y_train), 1)
+y_test = y_test.reshape(len(y_test), 1)
+
+print('max train value', np.max(x_train))
+print('Training values type', x_train.dtype)
 
 use_saved_model = False
 if use_saved_model:
 	model = keras.models.load_model("cifar.model")
 else:
 	model = keras.Sequential()
-	#model.add(Conv2D(16, (3,3), padding='same', input_shape=x_train.shape[1:],activation='relu'))
-	model.add(Conv2D(16, (3, 3), padding='same', input_shape=input_shape, activation='relu'))
-	#model.add(Conv2D(16, (3,3), strides=(2, 2), padding='same', activation='relu'))
-	model.add(Conv2D(16, (3,3), padding='same', activation='relu'))
+	model.add(Conv2D(8, (3, 3), padding='same', input_shape=input_shape, activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
+	#model.add(MaxPooling3D(pool_size=(2, 2, 2)))
+
+	model.add(Conv2D(16, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
 	#model.add(MaxPooling2D(pool_size=(2, 2)))
-	model.add(Conv2D(32, (3,3), padding='same', activation='relu'))
-	#model.add(Conv2D(32, (3,3), strides=(2,2), padding='same', activation='relu'))
+
 	model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
 	#model.add(MaxPooling2D(pool_size=(2, 2)))
-	#model.add(Dropout(0.5))
+
+	model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
+	#model.add(MaxPooling2D(pool_size=(2, 2)))
+
+	model.add(Conv2D(128, (3, 3), padding='same', activation='relu'))
+	model.add(BatchNormalization())
+	model.add(Dropout(0.2))
+	# model.add(MaxPooling2D(pool_size=(2, 2)))
+
+	#model.add(Conv2D(256, (3, 3), padding='same', activation='relu'))
+	#model.add(BatchNormalization())
+	#model.add(Dropout(0.2))
+	#model.add(MaxPooling2D(pool_size=(2, 2)))
+
+
+	# model.add(MaxPooling2D(pool_size=(2, 2)))
+
 	model.add(Flatten())
-	model.add(Dense(num_classes, activation='sigmoid',kernel_regularizer=regularizers.l1(0.0001)))
-	#model.compile(loss="sparse_categorical_crossentropy", optimizer='adam', metrics=["accuracy"])
+	model.add(Dense(16, activation='relu'))
+	model.add(Dense(num_classes, activation='sigmoid', kernel_regularizer=regularizers.l1(.001)))
+	# model.compile(loss="sparse_categorical_crossentropy", optimizer='adam', metrics=["accuracy"])
 	model.compile(loss="binary_crossentropy", optimizer='adam', metrics=["accuracy"])
 	model.summary()
 
-	batch_size = 128
-	epochs = 20
+	batch_size = 256
+	epochs = 10
 	history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1)
 	model.save("cifar.model")
 	print("--- %s seconds ---" % (time.time() - start_time))
@@ -181,16 +229,16 @@ np.set_printoptions(threshold=sys.maxsize)
 preds = model.predict(x_test)
 print('Predictions', preds)
 for i in range(len(preds)):
-	if(preds[i]>.1):
-		print(preds[i], '\n', i)
+	if(preds[i]>.5):
+		#print(preds[i], '\n', i)
 		preds[i] = 1
 	else:
 		preds[i] = 0
 
 
 # Performance metrics
-#print("X test", x_test)
-#print("y test", y_test)
+print("X test", x_test)
+print("y test", y_test)
 print("predictions", preds)
 print(classification_report(y_test, preds))
 print(confusion_matrix(y_test,preds))
