@@ -1,11 +1,12 @@
 import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, regularizers
 from keras.layers import Dense, Dropout, Activation, Flatten, BatchNormalization
-from keras.layers import Conv2D, MaxPooling2D, LeakyReLU
+from keras.layers import Conv2D, MaxPooling2D, LeakyReLU, MaxPooling3D
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.metrics import classification_report, confusion_matrix, f1_score, precision_score, recall_score
 import sklearn as skl
@@ -14,6 +15,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.dummy import DummyRegressor
 from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
+
 plt.rc('font', size=18)
 plt.rcParams['figure.constrained_layout.use'] = True
 import pandas as p
@@ -27,13 +29,14 @@ import matplotlib.patches as mpatches
 start_time = time.time()
 ssl._create_default_https_context = ssl._create_unverified_context
 
-df = p.read_csv('/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/max_engine_coolant_temp_attack.csv')
+df = p.read_csv('/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/correlated_signal_attack_1.csv')
 c1 = df.iloc[:, 2]  # Reading in ID
 
-ID = [None]*len(c1)
-PL = [None]*len(c1)
+ID = [None] * len(c1)
+PL = [None] * len(c1)
 TV = np.zeros(len(c1))
-y = 0; z = 0
+y = 0;
+z = 0
 
 for i in range(0, len(c1)):  # splitting id in HEX form
     string = c1[i]
@@ -41,13 +44,13 @@ for i in range(0, len(c1)):  # splitting id in HEX form
     PL[i] = string[4:20]
 
 for i in range(len(c1)):
-	if c1[i][14:16] == "FF":
-		if c1[i][0:3] == '4E7':
-			TV[i] = 1
-			y = y + 1
-	else:
-		TV[i] = 0
-		z = z + 1
+    if c1[i][4:20] == "595945450000FFFF":
+        if c1[i][0:3] == '6E0':
+            TV[i] = 1
+            y = y + 1
+    else:
+        TV[i] = 0
+        z = z + 1
 
 print('No. of attacks', y)
 print('No. of non attacks', z)
@@ -55,7 +58,7 @@ ID1 = [None] * len(ID)  # Separated payload 1
 ID2 = [None] * len(ID)  # Separated payload 2
 ID3 = [None] * len(ID)  # Separated payload 3
 IDbin = [None] * len(ID)  # Separated payload 3
-#IDbin = np.zeros(len(ID))
+# IDbin = np.zeros(len(ID))
 IDcomb = [None] * len(ID)  # Separated payload 3
 
 for i in range(0, len(ID)):
@@ -65,33 +68,93 @@ for i in range(0, len(ID)):
     id = id[2:]
     id = id.zfill(12)
     IDbin[i] = id
-#print(IDbin)
+# print(IDbin)
 
 samples = len(c1)
-IDs_in_past = 4
+IDs_in_past = 9
 bit_length = 12
 
 x = np.zeros([samples, IDs_in_past, bit_length])
 y = np.zeros([samples, 1])
 
+PL1 = [None] * len(c1)  # Payload bit 16
+PL2 = [None] * len(c1)  # Payload bit 16
+PL3 = [None] * len(c1)  # Payload bit 16
+PL4 = [None] * len(c1)  # Payload bit 16
+PL5 = [None] * len(c1)  # Payload bit 16
+
+for i in range(len(c1)):
+    pl = c1[i]
+    payload1 = pl[8:9]
+    payload2 = pl[9:10]
+    payload3 = pl[12:13]
+    payload4 = pl[16:17]
+    payload5 = pl[5:6]
+
+    payload1 = int(payload1, 16)
+    payload1 = bin(payload1)
+    payload1 = payload1[2:]
+    payload1 = payload1.zfill(12)
+
+    payload2 = int(payload2, 16)
+    payload2 = bin(payload2)
+    payload2 = payload2[2:]
+    payload2 = payload2.zfill(12)
+
+    payload3 = int(payload3, 16)
+    payload3 = bin(payload3)
+    payload3 = payload3[2:]
+    payload3 = payload3.zfill(12)
+
+    payload4 = int(payload4, 16)
+    payload4 = bin(payload4)
+    payload4 = payload4[2:]
+    payload4 = payload4.zfill(12)
+
+    payload5 = int(payload5, 16)
+    payload5 = bin(payload5)
+    payload5 = payload5[2:]
+    payload5 = payload5.zfill(12)
+
+    PL1[i] = payload1
+    PL2[i] = payload2
+    PL3[i] = payload3
+    PL4[i] = payload4
+    PL5[i] = payload5
+
 for i in range(3, samples):
     for j in range(IDs_in_past):
         for k in range(bit_length):
-            temp = IDbin[i-j]
+            temp = IDbin[i - j]
             x[i][j][k] = temp[k]
+
+for i in range(3, len(c1)):
+    for k in range(bit_length):
+        temp1 = PL1[i]
+        temp2 = PL2[i]
+        temp3 = PL3[i]
+        temp4 = PL4[i]
+        temp5 = PL5[i]
+
+        x[i][4][k] = temp1[k]
+        x[i][5][k] = temp2[k]
+        x[i][6][k] = temp3[k]
+        x[i][7][k] = temp2[k]
+        x[i][8][k] = temp3[k]
+
 print(TV)
 for i in range(3, samples):
-	#print(TV[i])
-	a = TV[i]
-	b = TV[i - 1]
-	c = TV[i - 2]
-	d = TV[i - 3]
-	z = np.sum([a, b, c, d])
-	if(z<1):  # Normal
-		y[i] = 0
-	if(z >= 1):  # Attack
-		y[i] = 1
-		print('Attack!', i)
+    # print(TV[i])
+    a = TV[i]
+    b = TV[i - 1]
+    c = TV[i - 2]
+    d = TV[i - 3]
+    z = np.sum([a, b, c, d])
+    if (z < 1):  # Normal
+        y[i] = 0
+    if (z >= 1):  # Attack
+        y[i] = 1
+        print('Attack!', i)
 
 print('X is', x)
 print('X shape', x.shape)
@@ -101,11 +164,12 @@ print('y shape', y.shape)
 x = x.astype('i')
 y = y.astype('i')
 
-x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1, random_state=0)  # Splitting data into training and test
+x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1,
+                                                                        random_state=0)  # Splitting data into training and test
 
 # Model / data parameters
 num_classes = 1
-input_shape = (1, 2, 2, 12)
+input_shape = (1, 9, 12)
 
 print("orig x_train shape:", x_train.shape)
 print("length of testing", len(x_test))
@@ -113,8 +177,8 @@ print("length of training", len(x_train))
 print("x train", x_train)
 print("y_train", y_train)
 
-x_train = x_train.reshape(len(x_train), 1, 2, 2, 12)
-x_test = x_test.reshape(len(x_test), 1, 2, 2, 12)
+x_train = x_train.reshape(len(x_train), 1, 9, 12)
+x_test = x_test.reshape(len(x_test), 1, 9, 12)
 y_train = y_train.reshape(len(y_train), 1)
 y_test = y_test.reshape(len(y_test), 1)
 
@@ -123,73 +187,87 @@ print('Training values type', x_train.dtype)
 
 use_saved_model = False
 if use_saved_model:
-	model = keras.models.load_model("cifar.model")
+    model = keras.models.load_model("cifar.model")
 else:
-	model = keras.Sequential()
-	#model.add(Conv2D(16, (3,3), padding='same', input_shape=x_train.shape[1:],activation='relu'))
-	model.add(Conv2D(16, (3, 3), padding='same', input_shape=input_shape, activation='relu'))
-	model.add(BatchNormalization())
-	model.add(Dropout(0.2))
-	#model.add(Conv2D(16, (3,3), strides=(2, 2), padding='same', activation='relu'))
-	model.add(Conv2D(16, (3,3), padding='same', activation='relu'))
-	model.add(BatchNormalization())
-	model.add(Dropout(0.2))
-	#model.add(MaxPooling2D(pool_size=(2, 2)))
-	model.add(Conv2D(32, (3,3), padding='same', activation='relu'))
-	model.add(BatchNormalization())
-	model.add(Dropout(0.2))
-	#model.add(Conv2D(32, (3,3), strides=(2,2), padding='same', activation='relu'))
-	model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))
-	model.add(BatchNormalization())
-	model.add(Dropout(0.2))
-	#model.add(MaxPooling2D(pool_size=(2, 2)))
-	#model.add(Dropout(0.5))
-	model.add(Flatten())
-	model.add(Dense(16, activation='relu'))
-	model.add(Dense(1, activation='sigmoid',kernel_regularizer=regularizers.l1(0.0001)))
-	#model.compile(loss="sparse_categorical_crossentropy", optimizer='adam', metrics=["accuracy"])
-	model.compile(loss="binary_crossentropy", optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), metrics=["accuracy"])
-	model.summary()
+    model = keras.Sequential()
+    model.add(Conv2D(8, (3, 3), padding='same', input_shape=input_shape, activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.2))
+    # model.add(MaxPooling3D(pool_size=(2, 2, 2)))
 
-	batch_size = 128
-	epochs = 20
-	history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1)
-	model.save("cifar.model")
-	print("--- %s seconds ---" % (time.time() - start_time))
-	plt.subplot(211)
-	plt.plot(history.history['accuracy'])
-	plt.plot(history.history['val_accuracy'])
-	plt.title('model accuracy')
-	plt.ylabel('accuracy')
-	plt.xlabel('epoch')
-	plt.legend(['train', 'val'], loc='upper left')
-	plt.subplot(212)
-	plt.plot(history.history['loss'])
-	plt.plot(history.history['val_loss'])
-	plt.title('model loss')
-	plt.ylabel('loss'); plt.xlabel('epoch')
-	plt.legend(['train', 'val'], loc='upper left')
-	plt.show()
+    model.add(Conv2D(16, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.2))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.2))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.2))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(128, (3, 3), padding='same', activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dropout(0.2))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    # model.add(Conv2D(256, (3, 3), padding='same', activation='relu'))
+    # model.add(BatchNormalization())
+    # model.add(Dropout(0.2))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Flatten())
+    model.add(Dense(16, activation='relu'))
+    model.add(Dense(num_classes, activation='sigmoid', kernel_regularizer=regularizers.l1(.001)))
+    # model.compile(loss="sparse_categorical_crossentropy", optimizer='adam', metrics=["accuracy"])
+    model.compile(loss="binary_crossentropy", optimizer='adam', metrics=["accuracy"])
+    model.summary()
+
+    batch_size = 256
+    epochs = 10
+    history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1)
+    model.save("cifar.model")
+    print("--- %s seconds ---" % (time.time() - start_time))
+    plt.subplot(211)
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'val'], loc='upper left')
+    plt.subplot(212)
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss');
+    plt.xlabel('epoch')
+    plt.legend(['train', 'val'], loc='upper left')
+    plt.show()
 
 # Classifying data
-#np.set_printoptions(threshold=sys.maxsize)
+np.set_printoptions(threshold=sys.maxsize)
 preds = model.predict(x_test)
 print('Predictions', preds)
 for i in range(len(preds)):
-	if(preds[i]>.5):
-		#print(preds[i], '\n', i)
-		preds[i] = 1
-	else:
-		preds[i] = 0
-
+    if (preds[i] > .5):
+        # print(preds[i], '\n', i)
+        preds[i] = 1
+    else:
+        preds[i] = 0
 
 # Performance metrics
 print("X test", x_test)
 print("y test", y_test)
 print("predictions", preds)
 print(classification_report(y_test, preds))
-print(confusion_matrix(y_test,preds))
-#print("Accuracy (Baseline):  ", model.score(t, BL_pred))  # Accuracy
+print(confusion_matrix(y_test, preds))
+# print("Accuracy (Baseline):  ", model.score(t, BL_pred))  # Accuracy
 print("F1 score: ", f1_score(y_test, preds, average="macro"))  # F1 score
 print("Precision: ", precision_score(y_test, preds, average="macro"))  # Precision score
 print("Recall: ", recall_score(y_test, preds, average="macro"))  # Recall score
@@ -197,20 +275,20 @@ print("Recall: ", recall_score(y_test, preds, average="macro"))  # Recall score
 # ROC curve
 plt.figure('ROC curve')
 fpr, tpr, _ = roc_curve(y_test, preds)  # Defining false positives and true positives
-plt.title("ROC curve for NN") # Title
-plt.plot(fpr,tpr, c='blue')  # Plot roc curve
+plt.title("ROC curve for NN")  # Title
+plt.plot(fpr, tpr, c='blue')  # Plot roc curve
 plt.xlabel('False positive rate')  # X label
 plt.ylabel('True positive rate')  # Y label
-#plt.show()
+# plt.show()
 
 # Calculate the fpr and tpr for all thresholds of the classification
 probs = model.predict(x_test)
-predicts = probs[:,0]
+predicts = probs[:, 0]
 fpr, tpr, threshold = roc_curve(y_test, predicts)  # Knn fpr and tpr
 roc_auc = metrics.auc(fpr, tpr)
 plt.plot(fpr, tpr, c='orange')  # Plot roc curve
 
-NN = mpatches.Patch(color = 'green', label="LR")  # Legend for NN
+NN = mpatches.Patch(color='green', label="LR")  # Legend for NN
 plt.legend(handles=[NN], loc="center right")  # Plotting legend
 fpr, tpr, thresholds = roc_curve(y_test, preds)  # ROC curve
 plt.plot(fpr, tpr, c='green')  # Plot ROC curve
