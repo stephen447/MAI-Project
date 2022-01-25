@@ -71,7 +71,7 @@ for i in range(0, len(ID)):
 # print(IDbin)
 
 samples = len(c1)
-IDs_in_past = 7
+IDs_in_past = 6
 bit_length = 12
 
 x = np.zeros([samples, IDs_in_past, bit_length])
@@ -79,7 +79,6 @@ y = np.zeros([samples, 1])
 
 PL1 = [None] * len(c1)  # Payload bit 16
 PL2 = [None] * len(c1)  # Payload bit 16
-PL3 = [None] * len(c1)  # Payload bit 16
 
 for i in range(len(c1)):
     pl = c1[i]
@@ -97,14 +96,9 @@ for i in range(len(c1)):
     payload2 = payload2[2:]
     payload2 = payload2.zfill(12)
 
-    payload3 = int(payload3, 16)
-    payload3 = bin(payload3)
-    payload3 = payload3[2:]
-    payload3 = payload3.zfill(12)
-
     PL1[i] = payload1
     PL2[i] = payload2
-    PL3[i] = payload3
+
 
 for i in range(3, samples):
     for j in range(IDs_in_past):
@@ -116,10 +110,8 @@ for i in range(3, len(c1)):
     for k in range(bit_length):
         temp1 = PL1[i]
         temp2 = PL2[i]
-        temp3 = PL3[i]
         x[i][4][k] = temp1[k]
         x[i][5][k] = temp2[k]
-        x[i][6][k] = temp3[k]
 
 
 for i in range(3, samples):
@@ -148,7 +140,7 @@ x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, te
 
 # Model / data parameters
 num_classes = 1
-input_shape = (1, 7, 12)
+input_shape = (1, 6, 12)
 
 print("orig x_train shape:", x_train.shape)
 print("length of testing", len(x_test))
@@ -156,8 +148,8 @@ print("length of training", len(x_train))
 #print("x train", x_train)
 #print("y_train", y_train)
 
-x_train = x_train.reshape(len(x_train), 1, 7, 12)
-x_test = x_test.reshape(len(x_test), 1, 7, 12)
+x_train = x_train.reshape(len(x_train), 1, 6, 12)
+x_test = x_test.reshape(len(x_test), 1, 6, 12)
 y_train = y_train.reshape(len(y_train), 1)
 y_test = y_test.reshape(len(y_test), 1)
 
