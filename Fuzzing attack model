@@ -30,7 +30,7 @@ start_time = time.time()
 ssl._create_default_https_context = ssl._create_unverified_context
 
 df = p.read_csv(
-    '/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/fuzzing_attack_1.csv')  # Reading in CSV file
+    '/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/fuzzing_attack_combined.csv')  # Reading in CSV file
 c1 = df.iloc[:, 2]  # Reading in ID and payload
 
 ID = [None] * len(c1)  # Array for all ID's
@@ -182,7 +182,7 @@ else:
     model.summary()
 
     batch_size = 256
-    epochs = 10
+    epochs = 15
     history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1)
     model.save("cifar.model")
     print("--- %s seconds ---" % (time.time() - start_time))
