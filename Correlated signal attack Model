@@ -29,7 +29,7 @@ start_time = time.time()
 ssl._create_default_https_context = ssl._create_unverified_context
 
 df = p.read_csv(
-    '/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/correlated_signal_attack_1.csv')  # Reading in CSV file
+    '/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/combined_correlated_signal_attack.csv')  # Reading in CSV file
 c1 = df.iloc[:, 2]  # Reading in ID and payload
 
 ID = [None] * len(c1)  # Array for all ID's
@@ -74,19 +74,48 @@ for i in range(0, len(ID)):
 # print(IDbin)
 
 samples = len(c1)
-IDs_in_past = 6  # Number of features
+IDs_in_past = 4  # Number of features
+Payload_bits = 16
 bit_length = 12  # Number of bits of each feature
 
-x = np.zeros([samples, IDs_in_past, bit_length])  # Array containing all feature which is used as input
+x = np.zeros([samples, (IDs_in_past+Payload_bits), bit_length])  # Array containing all feature which is used as input
 y = np.zeros([samples, 1])  # Array for target variable
 
 PL1 = [None] * len(c1)  # Payload  hex bit used as feature
 PL2 = [None] * len(c1)  # Payload hex bit used as feature
+PL3 = [None] * len(c1)  # Payload hex bit used as feature
+PL4 = [None] * len(c1)  # Payload hex bit used as feature
+PL5 = [None] * len(c1)  # Payload  hex bit used as feature
+PL6 = [None] * len(c1)  # Payload hex bit used as feature
+PL7 = [None] * len(c1)  # Payload hex bit used as feature
+PL8 = [None] * len(c1)  # Payload hex bit used as feature
+PL9 = [None] * len(c1)  # Payload  hex bit used as feature
+PL10 = [None] * len(c1)  # Payload hex bit used as feature
+PL11= [None] * len(c1)  # Payload hex bit used as feature
+PL12 = [None] * len(c1)  # Payload hex bit used as feature
+PL13 = [None] * len(c1)  # Payload  hex bit used as feature
+PL14 = [None] * len(c1)  # Payload hex bit used as feature
+PL15 = [None] * len(c1)  # Payload hex bit used as feature
+PL16 = [None] * len(c1)  # Payload hex bit used as feature
 
 for i in range(len(c1)):
     pl = c1[i]
     payload1 = pl[8:9]  # Payload bit 14
     payload2 = pl[9:10]  # Payload bit 15
+    payload3 = pl[10:11]  # Payload bit 15
+    payload4 = pl[11:12]  # Payload bit 15
+    payload5 = pl[12:13]  # Payload bit 14
+    payload6 = pl[13:14]  # Payload bit 15
+    payload7 = pl[14:15]  # Payload bit 15
+    payload8 = pl[15:16]  # Payload bit 15
+    payload9 = pl[4:5]  # Payload bit 14
+    payload10 = pl[5:6]  # Payload bit 15
+    payload11 = pl[6:7]  # Payload bit 15
+    payload12 = pl[16:17]  # Payload bit 15
+    payload13 = pl[17:18]  # Payload bit 14
+    payload14 = pl[18:19]  # Payload bit 15
+    payload15= pl[19:20]  # Payload bit 15
+    payload16 = pl[7:8]  # Payload bit 15
 
     payload1 = int(payload1, 16)  # Convert ID from HEX to an integer
     payload1 = bin(payload1)  # Convert the integer to binary
@@ -98,13 +127,97 @@ for i in range(len(c1)):
     payload2 = payload2[2:]  # Delete the '0b' at beginning of binary number
     payload2 = payload2.zfill(12)  # Zero pad the binary number to 12 bits
 
+    payload3 = int(payload3, 16)  # Convert ID from HEX to an integer
+    payload3 = bin(payload3)  # Convert the integer to binary
+    payload3 = payload3[2:]  # Delete the '0b' at beginning of binary number
+    payload3 = payload3.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload4 = int(payload4, 16)  # Convert ID from HEX to an integer
+    payload4 = bin(payload4)  # Convert the integer to binary
+    payload4 = payload4[2:]  # Delete the '0b' at beginning of binary number
+    payload4 = payload4.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload5 = int(payload5, 16)  # Convert ID from HEX to an integer
+    payload5 = bin(payload5)  # Convert the integer to binary
+    payload5 = payload5[2:]  # Delete the '0b' at beginning of binary number
+    payload5 = payload5.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload6 = int(payload6, 16)  # Convert ID from HEX to an integer
+    payload6 = bin(payload6)  # Convert the integer to binary
+    payload6 = payload6[2:]  # Delete the '0b' at beginning of binary number
+    payload6 = payload6.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload7 = int(payload7, 16)  # Convert ID from HEX to an integer
+    payload7 = bin(payload7)  # Convert the integer to binary
+    payload7 = payload7[2:]  # Delete the '0b' at beginning of binary number
+    payload7 = payload7.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload8 = int(payload8, 16)  # Convert ID from HEX to an integer
+    payload8 = bin(payload8)  # Convert the integer to binary
+    payload8 = payload8[2:]  # Delete the '0b' at beginning of binary number
+    payload8 = payload8.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload9 = int(payload9, 16)  # Convert ID from HEX to an integer
+    payload9 = bin(payload9)  # Convert the integer to binary
+    payload9 = payload9[2:]  # Delete the '0b' at beginning of binary number
+    payload9 = payload9.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload10 = int(payload10, 16)  # Convert ID from HEX to an integer
+    payload10 = bin(payload10)  # Convert the integer to binary
+    payload10 = payload10[2:]  # Delete the '0b' at beginning of binary number
+    payload10 = payload10.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload11 = int(payload11, 16)  # Convert ID from HEX to an integer
+    payload11 = bin(payload11)  # Convert the integer to binary
+    payload11 = payload11[2:]  # Delete the '0b' at beginning of binary number
+    payload11 = payload11.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload12 = int(payload12, 16)  # Convert ID from HEX to an integer
+    payload12 = bin(payload12)  # Convert the integer to binary
+    payload12 = payload12[2:]  # Delete the '0b' at beginning of binary number
+    payload12 = payload12.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload13 = int(payload13, 16)  # Convert ID from HEX to an integer
+    payload13 = bin(payload13)  # Convert the integer to binary
+    payload13 = payload13[2:]  # Delete the '0b' at beginning of binary number
+    payload13 = payload13.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload14 = int(payload14, 16)  # Convert ID from HEX to an integer
+    payload14 = bin(payload14)  # Convert the integer to binary
+    payload14 = payload14[2:]  # Delete the '0b' at beginning of binary number
+    payload14 = payload14.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload15 = int(payload15, 16)  # Convert ID from HEX to an integer
+    payload15 = bin(payload15)  # Convert the integer to binary
+    payload15 = payload15[2:]  # Delete the '0b' at beginning of binary number
+    payload15 = payload15.zfill(12)  # Zero pad the binary number to 12 bits
+
+    payload16 = int(payload16, 16)  # Convert ID from HEX to an integer
+    payload16 = bin(payload16)  # Convert the integer to binary
+    payload16 = payload16[2:]  # Delete the '0b' at beginning of binary number
+    payload16 = payload16.zfill(12)  # Zero pad the binary number to 12 bits
+
     PL1[i] = payload1  # Store payload 1 in PL1 array
     PL2[i] = payload2  # Store payload 2 in PL2 array
+    PL3[i] = payload3  # Store payload 1 in PL1 array
+    PL4[i] = payload4  # Store payload 2 in PL2 array
+    PL5[i] = payload5  # Store payload 1 in PL1 array
+    PL6[i] = payload6  # Store payload 2 in PL2 array
+    PL7[i] = payload7  # Store payload 1 in PL1 array
+    PL8[i] = payload8  # Store payload 2 in PL2 array
+    PL9[i] = payload9  # Store payload 1 in PL1 array
+    PL10[i] = payload10  # Store payload 2 in PL2 array
+    PL11[i] = payload11  # Store payload 1 in PL1 array
+    PL12[i] = payload12  # Store payload 2 in PL2 array
+    PL13[i] = payload13  # Store payload 1 in PL1 array
+    PL14[i] = payload14  # Store payload 2 in PL2 array
+    PL15[i] = payload15  # Store payload 1 in PL1 array
+    PL16[i] = payload16  # Store payload 2 in PL2 array
 
 # Creating input array for model
 # Adding 4 previous ID's
 for i in range(3, samples):
-    for j in range(IDs_in_past):
+    for j in range(3):
         for k in range(bit_length):
             temp = IDbin[i - j]
             x[i][j][k] = temp[k]
@@ -114,8 +227,36 @@ for i in range(3, len(c1)):
     for k in range(bit_length):
         temp1 = PL1[i]
         temp2 = PL2[i]
-        x[i][4][k] = temp1[k]
-        x[i][5][k] = temp2[k]
+        temp3 = PL3[i]
+        temp4 = PL4[i]
+        temp5 = PL5[i]
+        temp6 = PL6[i]
+        temp7 = PL7[i]
+        temp8 = PL8[i]
+        temp9 = PL9[i]
+        temp10 = PL10[i]
+        temp11 = PL11[i]
+        temp12 = PL12[i]
+        temp13 = PL13[i]
+        temp14 = PL14[i]
+        temp15 = PL15[i]
+        temp16 = PL16[i]
+        x[i][IDs_in_past][k] = temp1[k]
+        x[i][(IDs_in_past+1)][k] = temp2[k]
+        x[i][(IDs_in_past+2)][k] = temp3[k]
+        x[i][(IDs_in_past+3)][k] = temp4[k]
+        x[i][(IDs_in_past + 4)][k] = temp5[k]
+        x[i][(IDs_in_past + 5)][k] = temp6[k]
+        x[i][(IDs_in_past + 6)][k] = temp7[k]
+        x[i][(IDs_in_past + 7)][k] = temp8[k]
+        x[i][(IDs_in_past+8)][k] = temp9[k]
+        x[i][(IDs_in_past + 9)][k] = temp10[k]
+        x[i][(IDs_in_past + 10)][k] = temp11[k]
+        x[i][(IDs_in_past + 11)][k] = temp12[k]
+        x[i][(IDs_in_past + 12)][k] = temp13[k]
+        x[i][(IDs_in_past + 13)][k] = temp14[k]
+        x[i][(IDs_in_past + 14)][k] = temp15[k]
+        x[i][(IDs_in_past + 15)][k] = temp16[k]
 
 # Adding target variable for group of payload bits - if there is 1 or more attack messages label it as an attack
 for i in range(3, samples):
@@ -138,12 +279,55 @@ print('y shape', y.shape)  # Printing y shape
 x = x.astype('i')  # Denoting the variable type of x (input)
 y = y.astype('i')  # Denoting the variable type of y (target variable)
 
-x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1,
-                                                                        random_state=0)  # Splitting data into training and testing
+#x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1,
+                                                                        #random_state=0)  # Splitting data into training and testing
+train_prop = 0.8
+test_prop = 0.1
+val_prop = 0.1
+
+x_train_size = int(train_prop*len(c1))
+x_test_size = int(test_prop*len(c1))
+x_val_size = int(val_prop*len(c1))+2
+
+x_train = np.zeros([x_train_size, (IDs_in_past+Payload_bits), bit_length])
+y_train = np.zeros([x_train_size, 1])
+x_test = np.zeros([x_test_size, (IDs_in_past+Payload_bits), bit_length])
+y_test = np.zeros([x_test_size, 1])
+x_val = np.zeros([x_val_size, (IDs_in_past+Payload_bits), bit_length])
+y_val = np.zeros([x_val_size, 1])
+
+for index in range(0, x_train_size):
+    x_train[index] = x[index]
+    y_train[index] = y[index]
+
+for index in range(x_train_size, (x_train_size+x_test_size)):
+    x_test[index-x_train_size] = x[index]
+    y_test[index-x_train_size] = y[index]
+
+for index in range((x_train_size+x_test_size), len(c1)):
+    x_val[index-(x_train_size+x_test_size)] = x[index]
+    y_val[index-(x_train_size+x_test_size)] = y[index]
+
+'''
+print('x', x)
+print('x_train', x_train)
+print('y_train', y_train)
+print('x_test', x_test)
+print('y_test', y_test)
+print('x_val', x_val)
+print('y_val', y_val)
+
+print(len(x_train))
+print(len(y_train))
+print(len(x_test))
+print(len(y_test))
+print(len(x_val))
+print(len(y_val))
+'''
 
 # Model / data parameters
 num_classes = 1  # Number of classes needed to be predicted - 1
-input_shape = (1, 6, 12)  # Size of input - 6 features x 12 bits
+input_shape = (1, (IDs_in_past+Payload_bits), 12)  # Size of input - 6 features x 12 bits
 
 print("orig x_train shape:", x_train.shape)  # Printing shape of the x training set
 print("length of testing", len(x_test))  # Printing length of the x testing set
@@ -152,8 +336,8 @@ print("length of training", len(x_train))  # Printing length of the x training s
 # print("y_train", y_train)
 
 # Reshaping inputs for the model
-x_train = x_train.reshape(len(x_train), 1, 6, 12)
-x_test = x_test.reshape(len(x_test), 1, 6, 12)
+x_train = x_train.reshape(len(x_train), 1, (IDs_in_past+Payload_bits), 12)
+x_test = x_test.reshape(len(x_test), 1, (IDs_in_past+Payload_bits), 12)
 y_train = y_train.reshape(len(y_train), 1)
 y_test = y_test.reshape(len(y_test), 1)
 
@@ -162,7 +346,7 @@ if use_saved_model:
     model = keras.models.load_model("cifar.model")
 else:
     # Model definition
-    model_input = Input(shape=(1, 6, 12))
+    model_input = Input(shape=(1, (IDs_in_past+Payload_bits), 12))
     x = Conv2D(16, (3, 3), padding='same', input_shape=input_shape, activation='relu')(model_input)
     x = BatchNormalization()(x)
     x = Conv2D(32, (3, 3), padding='same', activation='relu')(x)
