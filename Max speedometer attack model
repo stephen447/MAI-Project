@@ -29,7 +29,7 @@ start_time = time.time()
 ssl._create_default_https_context = ssl._create_unverified_context
 
 df = p.read_csv(
-    '/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/max_speedometer_attack_1.csv')  # Reading in CSV file
+    '/Users/stephenbyrne/Documents/College Year 5/Project/Attacks/combined_max_speedo_attack.csv')  # Reading in CSV file
 c1 = df.iloc[:, 2]  # Reading in ID and payload
 
 ID = [None] * len(c1)  # Array for all ID's
@@ -74,7 +74,7 @@ for i in range(0, len(ID)):
 # print(IDbin)
 
 samples = len(c1)
-IDs_in_past = 6  # Number of features
+IDs_in_past = 18  # Number of features
 bit_length = 12  # Number of bits of each feature
 
 x = np.zeros([samples, IDs_in_past, bit_length])  # Array containing all feature which is used as input
@@ -103,22 +103,22 @@ for i in range(len(c1)):
 
 # Creating input array for model
 # Adding 4 previous ID's
-for i in range(3, samples):
-    for j in range(IDs_in_past):
+for i in range(15, samples):
+    for j in range(15):
         for k in range(bit_length):
             temp = IDbin[i - j]
             x[i][j][k] = temp[k]
 
 # Adding 2 of the current payload bits
-for i in range(3, len(c1)):
+for i in range(15, len(c1)):
     for k in range(bit_length):
         temp1 = PL1[i]
         temp2 = PL2[i]
-        x[i][4][k] = temp1[k]
-        x[i][5][k] = temp2[k]
+        x[i][16][k] = temp1[k]
+        x[i][17][k] = temp2[k]
 
 # Adding target variable for group of payload bits - if there is 1 or more attack messages label it as an attack
-for i in range(3, samples):
+for i in range(15, samples):
     # print(TV[i])
     a = TV[i]  # Current target variable
     b = TV[i - 1]  # Previous target variable
@@ -138,31 +138,89 @@ print('y shape', y.shape)  # Printing y shape
 x = x.astype('i')  # Denoting the variable type of x (input)
 y = y.astype('i')  # Denoting the variable type of y (target variable)
 
-x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1,
-                                                                        random_state=0)  # Splitting data into training and testing
+train_prop = 0.8
+test_prop = 0.1
+val_prop = 0.1
+
+x_train_size = int(train_prop*len(c1))
+x_test_size = int(test_prop*len(c1))
+x_val_size = int(val_prop*len(c1))+2
+
+x_train = np.zeros([x_train_size, IDs_in_past, bit_length])
+y_train = np.zeros([x_train_size, 1])
+x_test = np.zeros([x_test_size, IDs_in_past, bit_length])
+y_test = np.zeros([x_test_size, 1])
+x_val = np.zeros([x_val_size, IDs_in_past, bit_length])
+y_val = np.zeros([x_val_size, 1])
+
+for index in range(0, x_train_size):
+    x_train[index] = x[index]
+    y_train[index] = y[index]
+
+for index in range(x_train_size, (x_train_size+x_test_size)):
+    x_test[index-x_train_size] = x[index]
+    y_test[index-x_train_size] = y[index]
+
+for index in range((x_train_size+x_test_size), len(c1)):
+    x_val[index-(x_train_size+x_test_size)] = x[index]
+    y_val[index-(x_train_size+x_test_size)] = y[index]
+
+
+print('x', x)
+print('x_train', x_train)
+print('y_train', y_train)
+print('x_test', x_test)
+print('y_test', y_test)
+print('x_val', x_val)
+print('y_val', y_val)
+
+print(len(x_train))
+print(len(y_train))
+print(len(x_test))
+print(len(y_test))
+print(len(x_val))
+print(len(y_val))
+
+
+# Model / data parameters
+num_classes = 1
+input_shape = (1, 18, 12)
+
+print("orig x_train shape:", x_train.shape)
+print("length of testing", len(x_test))
+print("length of training", len(x_train))
+# print("x train", x_train)
+# print("y_train", y_train)
+
+x_train = x_train.reshape(len(x_train), 1, 18, 12)
+x_test = x_test.reshape(len(x_test), 1, 18, 12)
+y_train = y_train.reshape(len(y_train), 1)
+y_test = y_test.reshape(len(y_test), 1)
+
+#x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1, random_state=0)  # Splitting data into training and testing
 
 # Model / data parameters
 num_classes = 1  # Number of classes needed to be predicted - 1
-input_shape = (1, 6, 12)  # Size of input - 6 features x 12 bits
+input_shape = (1, 18, 12)  # Size of input - 6 features x 12 bits
 
 print("orig x_train shape:", x_train.shape)  # Printing shape of the x training set
 print("length of testing", len(x_test))  # Printing length of the x testing set
 print("length of training", len(x_train))  # Printing length of the x training set
 # print("x train", x_train)
 # print("y_train", y_train)
-
+'''
 # Reshaping inputs for the model
-x_train = x_train.reshape(len(x_train), 1, 6, 12)
-x_test = x_test.reshape(len(x_test), 1, 6, 12)
+x_train = x_train.reshape(len(x_train), 1, 10, 12)
+x_test = x_test.reshape(len(x_test), 1, 10, 12)
 y_train = y_train.reshape(len(y_train), 1)
 y_test = y_test.reshape(len(y_test), 1)
-
+'''
 use_saved_model = False
 if use_saved_model:
     model = keras.models.load_model("cifar.model")
 else:
     # Model definition
-    model_input = Input(shape=(1, 6, 12))
+    model_input = Input(shape=(1, 18, 12))
     x = Conv2D(16, (3, 3), padding='same', input_shape=input_shape, activation='relu')(model_input)
     x = BatchNormalization()(x)
     x = Conv2D(32, (3, 3), padding='same', activation='relu')(x)
