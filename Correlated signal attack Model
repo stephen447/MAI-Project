@@ -75,7 +75,7 @@ for i in range(0, len(ID)):
 
 samples = len(c1)
 IDs_in_past = 4  # Number of features
-Payload_bits = 16
+Payload_bits = 64
 bit_length = 12  # Number of bits of each feature
 
 x = np.zeros([samples, (IDs_in_past+Payload_bits), bit_length])  # Array containing all feature which is used as input
@@ -223,8 +223,10 @@ for i in range(3, samples):
             x[i][j][k] = temp[k]
 
 # Adding 2 of the current payload bits
+# Adding 2 of the current payload bits
 for i in range(3, len(c1)):
     for k in range(bit_length):
+
         temp1 = PL1[i]
         temp2 = PL2[i]
         temp3 = PL3[i]
@@ -241,6 +243,58 @@ for i in range(3, len(c1)):
         temp14 = PL14[i]
         temp15 = PL15[i]
         temp16 = PL16[i]
+
+        temp1a = PL1[i-1]
+        temp2a = PL2[i-1]
+        temp3a = PL3[i-1]
+        temp4a = PL4[i-1]
+        temp5a = PL5[i-1]
+        temp6a = PL6[i-1]
+        temp7a = PL7[i-1]
+        temp8a = PL8[i-1]
+        temp9a = PL9[i-1]
+        temp10a = PL10[i-1]
+        temp11a = PL11[i-1]
+        temp12a = PL12[i-1]
+        temp13a = PL13[i-1]
+        temp14a = PL14[i-1]
+        temp15a = PL15[i-1]
+        temp16a = PL16[i-1]
+
+        temp1b = PL1[i-2]
+        temp2b = PL2[i-2]
+        temp3b = PL3[i-2]
+        temp4b = PL4[i-2]
+        temp5b = PL5[i-2]
+        temp6b = PL6[i-2]
+        temp7b = PL7[i-2]
+        temp8b = PL8[i-2]
+        temp9b = PL9[i-2]
+        temp10b = PL10[i-2]
+        temp11b = PL11[i-2]
+        temp12b = PL12[i-2]
+        temp13b = PL13[i-2]
+        temp14b = PL14[i-2]
+        temp15b = PL15[i-2]
+        temp16b = PL16[i-2]
+
+        temp1c = PL1[i-3]
+        temp2c = PL2[i-3]
+        temp3c = PL3[i-3]
+        temp4c = PL4[i-3]
+        temp5c = PL5[i-3]
+        temp6c = PL6[i-3]
+        temp7c = PL7[i-3]
+        temp8c = PL8[i-3]
+        temp9c = PL9[i-3]
+        temp10c = PL10[i-3]
+        temp11c = PL11[i-3]
+        temp12c = PL12[i-3]
+        temp13c = PL13[i-3]
+        temp14c = PL14[i-3]
+        temp15c = PL15[i-3]
+        temp16c = PL16[i-3]
+
         x[i][IDs_in_past][k] = temp1[k]
         x[i][(IDs_in_past+1)][k] = temp2[k]
         x[i][(IDs_in_past+2)][k] = temp3[k]
@@ -257,6 +311,58 @@ for i in range(3, len(c1)):
         x[i][(IDs_in_past + 13)][k] = temp14[k]
         x[i][(IDs_in_past + 14)][k] = temp15[k]
         x[i][(IDs_in_past + 15)][k] = temp16[k]
+
+        x[i][(IDs_in_past + 16)][k] = temp1a[k]
+        x[i][(IDs_in_past + 17)][k] = temp2a[k]
+        x[i][(IDs_in_past + 18)][k] = temp3a[k]
+        x[i][(IDs_in_past + 19)][k] = temp4a[k]
+        x[i][(IDs_in_past + 20)][k] = temp5a[k]
+        x[i][(IDs_in_past + 21)][k] = temp6a[k]
+        x[i][(IDs_in_past + 22)][k] = temp7a[k]
+        x[i][(IDs_in_past + 23)][k] = temp8a[k]
+        x[i][(IDs_in_past + 24)][k] = temp9a[k]
+        x[i][(IDs_in_past + 25)][k] = temp10a[k]
+        x[i][(IDs_in_past + 26)][k] = temp11a[k]
+        x[i][(IDs_in_past + 27)][k] = temp12a[k]
+        x[i][(IDs_in_past + 28)][k] = temp13a[k]
+        x[i][(IDs_in_past + 29)][k] = temp14a[k]
+        x[i][(IDs_in_past + 30)][k] = temp15a[k]
+        x[i][(IDs_in_past + 31)][k] = temp16a[k]
+
+        x[i][(IDs_in_past + 32)][k] = temp1b[k]
+        x[i][(IDs_in_past + 33)][k] = temp2b[k]
+        x[i][(IDs_in_past + 34)][k] = temp3b[k]
+        x[i][(IDs_in_past + 35)][k] = temp4b[k]
+        x[i][(IDs_in_past + 36)][k] = temp5b[k]
+        x[i][(IDs_in_past + 37)][k] = temp6b[k]
+        x[i][(IDs_in_past + 38)][k] = temp7b[k]
+        x[i][(IDs_in_past + 39)][k] = temp8b[k]
+        x[i][(IDs_in_past + 40)][k] = temp9b[k]
+        x[i][(IDs_in_past + 41)][k] = temp10b[k]
+        x[i][(IDs_in_past + 42)][k] = temp11b[k]
+        x[i][(IDs_in_past + 43)][k] = temp12b[k]
+        x[i][(IDs_in_past + 44)][k] = temp13b[k]
+        x[i][(IDs_in_past + 45)][k] = temp14b[k]
+        x[i][(IDs_in_past + 46)][k] = temp15b[k]
+        x[i][(IDs_in_past + 47)][k] = temp16b[k]
+
+        x[i][(IDs_in_past + 48)][k] = temp1c[k]
+        x[i][(IDs_in_past + 49)][k] = temp2c[k]
+        x[i][(IDs_in_past + 50)][k] = temp3c[k]
+        x[i][(IDs_in_past + 51)][k] = temp4c[k]
+        x[i][(IDs_in_past + 52)][k] = temp5c[k]
+        x[i][(IDs_in_past + 53)][k] = temp6c[k]
+        x[i][(IDs_in_past + 54)][k] = temp7c[k]
+        x[i][(IDs_in_past + 55)][k] = temp8c[k]
+        x[i][(IDs_in_past + 56)][k] = temp9c[k]
+        x[i][(IDs_in_past + 57)][k] = temp10c[k]
+        x[i][(IDs_in_past + 58)][k] = temp11c[k]
+        x[i][(IDs_in_past + 59)][k] = temp12c[k]
+        x[i][(IDs_in_past + 60)][k] = temp13c[k]
+        x[i][(IDs_in_past + 61)][k] = temp14c[k]
+        x[i][(IDs_in_past + 62)][k] = temp15c[k]
+        x[i][(IDs_in_past + 63)][k] = temp16c[k]
+
 
 # Adding target variable for group of payload bits - if there is 1 or more attack messages label it as an attack
 for i in range(3, samples):
