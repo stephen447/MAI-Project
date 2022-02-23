@@ -277,7 +277,7 @@ for i in range(3, len(c1)):
         temp14b = PL14[i-2]
         temp15b = PL15[i-2]
         temp16b = PL16[i-2]
-
+        
         temp1c = PL1[i-3]
         temp2c = PL2[i-3]
         temp3c = PL3[i-3]
@@ -345,7 +345,7 @@ for i in range(3, len(c1)):
         x[i][(IDs_in_past + 45)][k] = temp14b[k]
         x[i][(IDs_in_past + 46)][k] = temp15b[k]
         x[i][(IDs_in_past + 47)][k] = temp16b[k]
-
+        
         x[i][(IDs_in_past + 48)][k] = temp1c[k]
         x[i][(IDs_in_past + 49)][k] = temp2c[k]
         x[i][(IDs_in_past + 50)][k] = temp3c[k]
@@ -452,18 +452,30 @@ if use_saved_model:
     model = keras.models.load_model("cifar.model")
 else:
     # Model definition
-    model_input = Input(shape=(1, (IDs_in_past+Payload_bits), 12))
+    model_input = Input(shape=(1, (IDs_in_past + Payload_bits), 12))
     x = Conv2D(16, (3, 3), padding='same', input_shape=input_shape, activation='relu')(model_input)
     x = BatchNormalization()(x)
+    x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+
     x = Conv2D(32, (3, 3), padding='same', activation='relu')(x)
     x = BatchNormalization()(x)
     x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
-    x = Conv2D(64, (3, 3), padding='same', activation='relu')(x)
-    x = BatchNormalization()(x)
-    x = Conv2D(128, (3, 3), padding='same', activation='relu')(x)
-    x = BatchNormalization()(x)
+
+    #x = Conv2D(64, (3, 3), padding='same', activation='relu')(x)
+    #x = BatchNormalization()(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+
+
+    #x = Conv2D(128, (3, 3), padding='same', activation='relu')(x)
+    #x = BatchNormalization()(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+
+    #x = Conv2D(256, (3, 3), padding='same', activation='relu')(x)
+    #x = BatchNormalization()(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+
     x = Flatten()(x)
-    x = Dense(16, activation='relu', kernel_regularizer=regularizers.l1(0.0001))(x)
+    #x = Dense(16, activation='relu', kernel_regularizer=regularizers.l1(0.0001))(x)
     x = Dense(num_classes, kernel_regularizer=regularizers.l1(0.0001))(x)
     x = Activation(activation='sigmoid')(x)
 
@@ -536,4 +548,4 @@ fpr, tpr, thresholds = roc_curve(y_test, preds)  # ROC curve
 plt.plot(fpr, tpr, c='green')  # Plot ROC curve
 plt.show()  # Display graph
 
-model.save_weights('./Max_attack_check.h5')  # Save model
+model.save_weights('./CSA.h5')  # Save model
