@@ -203,12 +203,12 @@ else:
     x = BatchNormalization()(x)
     x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
 
-    #x = Conv2D(128, (3, 3), padding='same', activation='relu')(x)
-    #x = BatchNormalization()(x)
-    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+    x = Conv2D(128, (3, 3), padding='same', activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
 
     x = Flatten()(x)
-    #x = Dense(16, activation='relu', kernel_regularizer=regularizers.l1(0.0001))(x)
+    x = Dense(16, activation='relu', kernel_regularizer=regularizers.l1(0.0001))(x)
     x = Dense(num_classes, kernel_regularizer=regularizers.l1(0.0001))(x)
     x = Activation(activation='sigmoid')(x)
 
