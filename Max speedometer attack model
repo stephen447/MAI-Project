@@ -35,8 +35,7 @@ c1 = df.iloc[:, 2]  # Reading in ID and payload
 ID = [None] * len(c1)  # Array for all ID's
 PL = [None] * len(c1)  # Array for all payloads
 TV = np.zeros(len(c1))  # Array for all target variables
-y = 0;
-z = 0  # Variables for attack message sand non-attack messages
+y = 0; z = 0  # Variables for attack message sand non-attack messages
 
 # Separating message id and payload
 for i in range(0, len(c1)):
@@ -56,11 +55,11 @@ for i in range(len(c1)):
 
 print('No. of attacks', y)  # Printing number of attacks in the CSV file
 print('No. of non attacks', z)  # Printing number of non-attacks in CSV file
+
 ID1 = [None] * len(ID)  # Separated payload 1
 ID2 = [None] * len(ID)  # Separated payload 2
 ID3 = [None] * len(ID)  # Separated payload 3
 IDbin = [None] * len(ID)  # Array for ID's stored in binary format
-
 IDcomb = [None] * len(ID)  # Separated payload 3
 
 # Converting the ID's from HEX to binary
@@ -73,11 +72,12 @@ for i in range(0, len(ID)):
     IDbin[i] = id  # Store in the IDbin array
 # print(IDbin)
 
-samples = len(c1)
-IDs_in_past = 18  # Number of features
+samples = len(c1)  # Number of samples in the dataset
+IDs_in_past = 16  # Number of features
+Payload_bits = 2  # No. of payload bits use
 bit_length = 12  # Number of bits of each feature
 
-x = np.zeros([samples, IDs_in_past, bit_length])  # Array containing all feature which is used as input
+x = np.zeros([samples, (IDs_in_past+Payload_bits), bit_length])  # Array containing all feature which is used as input
 y = np.zeros([samples, 1])  # Array for target variable
 
 PL1 = [None] * len(c1)  # Payload  hex bit used as feature
@@ -114,8 +114,8 @@ for i in range(15, len(c1)):
     for k in range(bit_length):
         temp1 = PL1[i]
         temp2 = PL2[i]
-        x[i][16][k] = temp1[k]
-        x[i][17][k] = temp2[k]
+        x[i][4][k] = temp1[k]
+        x[i][5][k] = temp2[k]
 
 # Adding target variable for group of payload bits - if there is 1 or more attack messages label it as an attack
 for i in range(15, samples):
@@ -146,11 +146,11 @@ x_train_size = int(train_prop*len(c1))
 x_test_size = int(test_prop*len(c1))
 x_val_size = int(val_prop*len(c1))+2
 
-x_train = np.zeros([x_train_size, IDs_in_past, bit_length])
+x_train = np.zeros([x_train_size, (IDs_in_past+Payload_bits), bit_length])
 y_train = np.zeros([x_train_size, 1])
-x_test = np.zeros([x_test_size, IDs_in_past, bit_length])
+x_test = np.zeros([x_test_size, (IDs_in_past+Payload_bits), bit_length])
 y_test = np.zeros([x_test_size, 1])
-x_val = np.zeros([x_val_size, IDs_in_past, bit_length])
+x_val = np.zeros([x_val_size, (IDs_in_past+Payload_bits), bit_length])
 y_val = np.zeros([x_val_size, 1])
 
 for index in range(0, x_train_size):
@@ -183,8 +183,8 @@ print(len(y_val))
 
 
 # Model / data parameters
-num_classes = 1
-input_shape = (1, 18, 12)
+num_classes = 1  # Number of classes needed to be predicted - 1
+input_shape = (1, (IDs_in_past+Payload_bits), 12)  # Size of input - 6 features x 12 bits
 
 print("orig x_train shape:", x_train.shape)
 print("length of testing", len(x_test))
@@ -192,16 +192,11 @@ print("length of training", len(x_train))
 # print("x train", x_train)
 # print("y_train", y_train)
 
-x_train = x_train.reshape(len(x_train), 1, 18, 12)
-x_test = x_test.reshape(len(x_test), 1, 18, 12)
+# Reshaping inputs for the model
+x_train = x_train.reshape(len(x_train), 1, (IDs_in_past+Payload_bits), 12)
+x_test = x_test.reshape(len(x_test), 1, (IDs_in_past+Payload_bits), 12)
 y_train = y_train.reshape(len(y_train), 1)
 y_test = y_test.reshape(len(y_test), 1)
-
-#x_train, x_test, y_train, y_test = skl.model_selection.train_test_split(x, y, test_size=.1, random_state=0)  # Splitting data into training and testing
-
-# Model / data parameters
-num_classes = 1  # Number of classes needed to be predicted - 1
-input_shape = (1, 18, 12)  # Size of input - 6 features x 12 bits
 
 print("orig x_train shape:", x_train.shape)  # Printing shape of the x training set
 print("length of testing", len(x_test))  # Printing length of the x testing set
@@ -220,16 +215,32 @@ if use_saved_model:
     model = keras.models.load_model("cifar.model")
 else:
     # Model definition
-    model_input = Input(shape=(1, 18, 12))
+    model_input = Input(shape=(1, (IDs_in_past + Payload_bits), 12))
     x = Conv2D(16, (3, 3), padding='same', input_shape=input_shape, activation='relu')(model_input)
     x = BatchNormalization()(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+    #x = Dropout(0.5)(x)
+
     x = Conv2D(32, (3, 3), padding='same', activation='relu')(x)
     x = BatchNormalization()(x)
-    x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+    #x = Dropout(0.5)(x)
+
     x = Conv2D(64, (3, 3), padding='same', activation='relu')(x)
     x = BatchNormalization()(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+    #x = Dropout(0.5)(x)
+
     x = Conv2D(128, (3, 3), padding='same', activation='relu')(x)
     x = BatchNormalization()(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+    #x = Dropout(0.5)(x)
+
+    #x = Conv2D(256, (3, 3), padding='same', activation='relu')(x)
+    #x = BatchNormalization()(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+    #x = Dropout(0.5)(x)
+
     x = Flatten()(x)
     x = Dense(16, activation='relu', kernel_regularizer=regularizers.l1(0.0001))(x)
     x = Dense(num_classes, kernel_regularizer=regularizers.l1(0.0001))(x)
@@ -304,4 +315,4 @@ fpr, tpr, thresholds = roc_curve(y_test, preds)  # ROC curve
 plt.plot(fpr, tpr, c='green')  # Plot ROC curve
 plt.show()  # Display graph
 
-model.save_weights('./Max_attack_check.h5')  # Save model
+model.save_weights('./Max_Speedo_Attack.h5')  # Save model
