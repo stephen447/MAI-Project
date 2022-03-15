@@ -35,7 +35,7 @@ c1 = df.iloc[:, 2]  # Reading in ID and payload
 ID = [None] * len(c1)  # Array for all ID's
 PL = [None] * len(c1)  # Array for all payloads
 TV = np.zeros(len(c1))  # Array for all target variables
-y = 0;
+y = 0
 z = 0  # Variables for attack message sand non-attack messages
 
 # Separating message id and payload
@@ -104,19 +104,19 @@ for i in range(len(c1)):
 
 # Creating input array for model
 # Adding 4 previous ID's
-for i in range(3, samples):
+for i in range((IDs_in_past-1), samples):
     for j in range(IDs_in_past):
         for k in range(bit_length):
             temp = IDbin[i - j]
             x[i][j][k] = temp[k]
 
 # Adding 2 of the current payload bits
-for i in range(3, len(c1)):
+for i in range((IDs_in_past-1), len(c1)):
     for k in range(bit_length):
         temp1 = PL1[i]
         temp2 = PL2[i]
-        x[i][4][k] = temp1[k]
-        x[i][5][k] = temp2[k]
+        x[i][IDs_in_past][k] = temp1[k]
+        x[i][(IDs_in_past+1)][k] = temp2[k]
 
 # Adding target variable for group of payload bits - if there is 1 or more attack messages label it as an attack
 for i in range(3, samples):
@@ -199,16 +199,16 @@ else:
     x = BatchNormalization()(x)
     x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
 
-    x = Conv2D(64, (3, 3), padding='same', activation='relu')(x)
-    x = BatchNormalization()(x)
-    x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+    #x = Conv2D(64, (3, 3), padding='same', activation='relu')(x)
+    #x = BatchNormalization()(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
 
-    x = Conv2D(128, (3, 3), padding='same', activation='relu')(x)
-    x = BatchNormalization()(x)
-    x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
+    #x = Conv2D(128, (3, 3), padding='same', activation='relu')(x)
+    #x = BatchNormalization()(x)
+    #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
 
     x = Flatten()(x)
-    x = Dense(16, activation='relu', kernel_regularizer=regularizers.l1(0.0001))(x)
+    #x = Dense(16, activation='relu', kernel_regularizer=regularizers.l1(0.0001))(x)
     x = Dense(num_classes, kernel_regularizer=regularizers.l1(0.0001))(x)
     x = Activation(activation='sigmoid')(x)
 
@@ -258,6 +258,8 @@ print("Accuracy:  ", accuracy_score(y_test, preds))  # Accuracy
 print("F1 score: ", f1_score(y_test, preds, average="macro"))  # F1 score
 print("Precision: ", precision_score(y_test, preds, average="macro"))  # Precision score
 print("Recall: ", recall_score(y_test, preds, average="macro"))  # Recall score
+tn, fp, fn, tp = confusion_matrix(list(y_test), list(preds), labels=[0, 1]).ravel()
+print("False positve rate: ", (fp/(tn+fp)))
 
 # ROC curve
 plt.figure('ROC curve for maximum engine coolant attack')  # Figure title
