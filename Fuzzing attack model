@@ -8,7 +8,7 @@ from tensorflow.keras import layers, regularizers
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten, BatchNormalization, Input
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, LeakyReLU, MaxPooling3D
 from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.metrics import classification_report, confusion_matrix, f1_score, precision_score, recall_score
+from sklearn.metrics import classification_report, confusion_matrix, f1_score, precision_score, recall_score, accuracy_score
 import sklearn as skl
 import sklearn.model_selection
 from sklearn.model_selection import train_test_split
@@ -212,17 +212,16 @@ for i in range(len(c1)):
     PL15[i] = payload15  # Store payload 1 in PL1 array
     PL16[i] = payload16  # Store payload 2 in PL2 array
 
-print('PL1', PL1[i])
 # Creating input array for model
 # Adding 4 previous ID's
-for i in range(3, samples):
-    for j in range(3):
+for i in range((IDs_in_past-1), samples):
+    for j in range(IDs_in_past):
         for k in range(bit_length):
             temp = IDbin[i - j]
             x[i][j][k] = temp[k]
 
 # Adding 2 of the current payload bits
-for i in range(3, len(c1)):
+for i in range((IDs_in_past-1), len(c1)):
     for k in range(bit_length):
 
         temp1 = PL1[i]
@@ -362,7 +361,7 @@ for i in range(3, len(c1)):
         x[i][(IDs_in_past + 63)][k] = temp16c[k]
 
 # Adding target variable for group of payload bits - if there is 1 or more attack messages label it as an attack
-for i in range(3, samples):
+for i in range((IDs_in_past-1), samples):
     # print(TV[i])
     a = TV[i]  # Current target variable
     b = TV[i - 1]  # Previous target variable
@@ -489,6 +488,7 @@ else:
     history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1)
     model.save("cifar.model")
     print("--- %s seconds ---" % (time.time() - start_time))
+    plt.figure('Training performance for the fuzzing attack')  # Figure title
     plt.subplot(211)
     plt.plot(history.history['accuracy'])
     plt.plot(history.history['val_accuracy'])
@@ -522,16 +522,18 @@ print("y test", y_test)  # Printing target variable training set
 print("predictions", preds)  # Printing predictions after classification
 print(classification_report(y_test, preds))  # Printing classification report
 print(confusion_matrix(y_test, preds))  # Printing confusion matrix
-# print("Accuracy (Baseline):  ", model.score(t, BL_pred))  # Accuracy
+print("Accuracy:  ", accuracy_score(y_test, preds))  # Accuracy
 print("F1 score: ", f1_score(y_test, preds, average="macro"))  # F1 score
 print("Precision: ", precision_score(y_test, preds, average="macro"))  # Precision score
 print("Recall: ", recall_score(y_test, preds, average="macro"))  # Recall score
+tn, fp, fn, tp = confusion_matrix(list(y_test), list(preds), labels=[0, 1]).ravel()
+print("False positve rate: ", (fp/(tn+fp)))
 
 # ROC curve
-plt.figure('ROC curve')  # Figure title
+plt.figure('ROC curve for fuzzing attack')  # Figure title
 fpr, tpr, _ = roc_curve(y_test, preds)  # Defining false positives and true positives
-plt.title("ROC curve for NN")  # Title
-plt.plot(fpr, tpr, c='blue')  # Plot roc curve
+plt.title("ROC curve")  # Title
+#plt.plot(fpr, tpr, c='blue')  # Plot roc curve
 plt.xlabel('False positive rate')  # X label
 plt.ylabel('True positive rate')  # Y label
 # plt.show()
@@ -541,12 +543,13 @@ probs = model.predict(x_test)
 predicts = probs[:, 0]
 fpr, tpr, threshold = roc_curve(y_test, predicts)  # Knn fpr and tpr
 roc_auc = metrics.auc(fpr, tpr)
-plt.plot(fpr, tpr, c='orange')  # Plot roc curve
+print('AUC: ', metrics.roc_auc_score(y_test, predicts))  # Print AUC value for ROC curve
+plt.plot(fpr, tpr, c='green')  # Plot roc curve
 
-NN = mpatches.Patch(color='green', label="LR")  # Legend for NN
+NN = mpatches.Patch(color='green', label="ROC")  # Legend for NN
 plt.legend(handles=[NN], loc="center right")  # Plotting legend
 fpr, tpr, thresholds = roc_curve(y_test, preds)  # ROC curve
-plt.plot(fpr, tpr, c='green')  # Plot ROC curve
+#plt.plot(fpr, tpr, c='green')  # Plot ROC curve
 plt.show()  # Display graph
 
 model.save_weights('./fuzzing_attack.h5')  # Save model
