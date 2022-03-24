@@ -222,7 +222,8 @@ for i in range((IDs_in_past-1), samples):
             temp = IDbin[i - j]
             x[i][j][k] = temp[k]
 
-# Adding 2 of the current payload bits
+
+
 # Adding 2 of the current payload bits
 for i in range(3, len(c1)):
     for k in range(bit_length):
@@ -345,7 +346,7 @@ for i in range(3, len(c1)):
         x[i][(IDs_in_past + 45)][k] = temp14b[k]
         x[i][(IDs_in_past + 46)][k] = temp15b[k]
         x[i][(IDs_in_past + 47)][k] = temp16b[k]
-        
+
         x[i][(IDs_in_past + 48)][k] = temp1c[k]
         x[i][(IDs_in_past + 49)][k] = temp2c[k]
         x[i][(IDs_in_past + 50)][k] = temp3c[k]
