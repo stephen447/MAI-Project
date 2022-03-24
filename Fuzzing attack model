@@ -220,6 +220,8 @@ for i in range((IDs_in_past-1), samples):
             temp = IDbin[i - j]
             x[i][j][k] = temp[k]
 
+
+
 # Adding 2 of the current payload bits
 for i in range((IDs_in_past-1), len(c1)):
     for k in range(bit_length):
@@ -342,7 +344,7 @@ for i in range((IDs_in_past-1), len(c1)):
         x[i][(IDs_in_past + 45)][k] = temp14b[k]
         x[i][(IDs_in_past + 46)][k] = temp15b[k]
         x[i][(IDs_in_past + 47)][k] = temp16b[k]
-        
+
         x[i][(IDs_in_past + 48)][k] = temp1c[k]
         x[i][(IDs_in_past + 49)][k] = temp2c[k]
         x[i][(IDs_in_past + 50)][k] = temp3c[k]
@@ -364,9 +366,9 @@ for i in range((IDs_in_past-1), len(c1)):
 for i in range((IDs_in_past-1), samples):
     # print(TV[i])
     a = TV[i]  # Current target variable
-    b = TV[i - 1]  # Previous target variable
-    c = TV[i - 2]  # 2nd Previous target variable
-    d = TV[i - 3]  # 3rd Previous target variable
+    b = TV[i-1]  # Previous target variable
+    c = TV[i-2]  # 2nd Previous target variable
+    d = TV[i-3]  # 3rd Previous target variable
     z = np.sum([a, b, c, d])  # Sum of target variable values
     if z < 1:  # Normal
         y[i] = 0
