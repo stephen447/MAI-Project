@@ -74,7 +74,7 @@ for i in range(0, len(ID)):
 
 samples = len(c1)  # Number of samples in the dataset
 IDs_in_past = 4  # Number of features
-Payload_bits = 2  # No. of payload bits use
+Payload_bits = 8 # No. of payload bits use
 bit_length = 12  # Number of bits of each feature
 
 x = np.zeros([samples, (IDs_in_past+Payload_bits), bit_length])  # Array containing all feature which is used as input
@@ -114,16 +114,36 @@ for i in range((IDs_in_past-1), len(c1)):
     for k in range(bit_length):
         temp1 = PL1[i]
         temp2 = PL2[i]
-        x[i][4][k] = temp1[k]
-        x[i][5][k] = temp2[k]
+
+        #temp1a = PL1[i-1]
+        #temp2a = PL2[i-1]
+
+        #temp1b = PL1[i-2]
+        #temp2b = PL2[i-2]
+
+        #temp1c = PL1[i-3]
+        #temp2c = PL2[i-3]
+
+
+        x[i][IDs_in_past][k] = temp1[k]
+        x[i][(IDs_in_past+1)][k] = temp2[k]
+
+        #x[i][(IDs_in_past+2)][k] = temp1a[k]
+        #x[i][(IDs_in_past+3)][k] = temp2a[k]
+
+        #x[i][(IDs_in_past+4)][k] = temp1b[k]
+        #x[i][(IDs_in_past+5)][k] = temp2b[k]
+
+        #x[i][(IDs_in_past+6)][k] = temp1c[k]
+        #x[i][(IDs_in_past+7)][k] = temp2c[k]
 
 # Adding target variable for group of payload bits - if there is 1 or more attack messages label it as an attack
 for i in range((IDs_in_past-1), samples):
     # print(TV[i])
     a = TV[i]  # Current target variable
-    b = TV[i - 1]  # Previous target variable
-    c = TV[i - 2]  # 2nd Previous target variable
-    d = TV[i - 3]  # 3rd Previous target variable
+    b = TV[i-1]  # Previous target variable
+    c = TV[i-2]  # 2nd Previous target variable
+    d = TV[i-3]  # 3rd Previous target variable
     z = np.sum([a, b, c, d])  # Sum of target variable values
     if z < 1:  # Normal
         y[i] = 0
@@ -166,20 +186,20 @@ for index in range((x_train_size+x_test_size), len(c1)):
     y_val[index-(x_train_size+x_test_size)] = y[index]
 
 
-print('x', x)
-print('x_train', x_train)
-print('y_train', y_train)
-print('x_test', x_test)
-print('y_test', y_test)
-print('x_val', x_val)
-print('y_val', y_val)
+#print('x', x)
+#print('x_train', x_train)
+#print('y_train', y_train)
+#print('x_test', x_test)
+#print('y_test', y_test)
+#print('x_val', x_val)
+#print('y_val', y_val)
 
-print(len(x_train))
-print(len(y_train))
-print(len(x_test))
-print(len(y_test))
-print(len(x_val))
-print(len(y_val))
+#print(len(x_train))
+#print(len(y_train))
+#print(len(x_test))
+#print(len(y_test))
+#print(len(x_val))
+#print(len(y_val))
 
 
 # Model / data parameters
@@ -203,13 +223,7 @@ print("length of testing", len(x_test))  # Printing length of the x testing set
 print("length of training", len(x_train))  # Printing length of the x training set
 # print("x train", x_train)
 # print("y_train", y_train)
-'''
-# Reshaping inputs for the model
-x_train = x_train.reshape(len(x_train), 1, 10, 12)
-x_test = x_test.reshape(len(x_test), 1, 10, 12)
-y_train = y_train.reshape(len(y_train), 1)
-y_test = y_test.reshape(len(y_test), 1)
-'''
+
 use_saved_model = False
 if use_saved_model:
     model = keras.models.load_model("cifar.model")
@@ -231,8 +245,8 @@ else:
     #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
     #x = Dropout(0.5)(x)
 
-    x = Conv2D(128, (3, 3), padding='same', activation='relu')(x)
-    x = BatchNormalization()(x)
+    #x = Conv2D(128, (3, 3), padding='same', activation='relu')(x)
+    #x = BatchNormalization()(x)
     #x = MaxPooling2D(pool_size=(2, 2), padding='Same')(x)
     #x = Dropout(0.5)(x)
 
@@ -242,7 +256,7 @@ else:
     #x = Dropout(0.5)(x)
 
     x = Flatten()(x)
-    x = Dense(16, activation='relu', kernel_regularizer=regularizers.l1(0.0001))(x)
+    #x = Dense(16, activation='relu', kernel_regularizer=regularizers.l1(0.0001))(x)
     x = Dense(num_classes, kernel_regularizer=regularizers.l1(0.0001))(x)
     x = Activation(activation='sigmoid')(x)
 
